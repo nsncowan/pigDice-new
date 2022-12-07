@@ -3,7 +3,7 @@
 function Game() {
   this.players = [];
   this.activePlayer = 0;
-  this.playerCount = 2;
+  this.playerCount;
 }
 
 function Player() {
@@ -24,10 +24,27 @@ Game.prototype.switchPlayer = function () {
   } else {
     this.activePlayer = 0;
   }
-  // if (this.playerCount = 1) {
-  //   Player.chooseAction();
-  // }
 };
+
+Game.prototype.aiCheck = function () {
+  if (this.activePlayer === 1 && this.playerCount === 1) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+Game.prototype.chooseAction = function() {
+  while (this.aiCheck()) {
+    if (this.players[this.activePlayer].rollsThisTurn < 2) {
+      this.players[this.activePlayer].rollDice();
+      amIWinner();
+    } else {
+      this.players[this.activePlayer].endTurn();
+      amIWinner();
+    }
+  }
+}
 
 Player.prototype.rollDice = function() {
   this.rolledYet = true;
@@ -53,23 +70,10 @@ Player.prototype.endTurn = function() {
   newGame.switchPlayer();
 };
 
-Player.prototype.chooseAction = function() {
-  if (this.rollsThisTurn <2) {
-    this.rollDice;
-  } else {
-    this.endTurn;
-  }
-}
-
 let newGame = new Game();
 let player1 = new Player();
 let player2 = new Player();
 newGame.players.push(player1, player2);
-
-// Player.prototype.aiLogic = function() {
-  
-// }
-
 
 //UI
 
@@ -123,20 +127,22 @@ window.addEventListener("load", function() {
   let player1PassBtn = document.getElementById("passDicePlayer1");
   let player2RollBtn = document.getElementById("rollDicePlayer2");
   let player2PassBtn = document.getElementById("passDicePlayer2");
-  let numberOfPlayers = document.getElementById("numberOfPlayers");
+  let gameSettings = document.getElementById("gameSettings");
 
-  numberOfPlayers.addEventListener('submit', function(event) {
+  gameSettings.addEventListener('submit', function(event) {
     event.preventDefault();
-    
-    newGame.playerCount = parseInt(document.querySelector('input[name="userCount"]:checked').value);
+    document.querySelector("#game").removeAttribute("id", "hidden");
+    document.querySelector("form").setAttribute("class", "hidden");
+    newGame.playerCount = Number(document.querySelector('input[name="userCount"]:checked').value);
   });
-
-  // document.querySelector('input[name="genderS"]:checked').value;
 
   player1RollBtn.addEventListener('click', function() {
     newGame.players[newGame.activePlayer].rollDice();
     document.getElementById("passDicePlayer1").removeAttribute("class", "hidden");
     amIWinner();
+    displayScores();
+    manageUI();
+    newGame.chooseAction();
     displayScores();
     manageUI();
   });
@@ -147,8 +153,10 @@ window.addEventListener("load", function() {
     amIWinner();
     displayScores();
     manageUI();
+    newGame.chooseAction();
+    displayScores();
+    manageUI();
   });
-
 
   player2RollBtn.addEventListener('click', function () {
     newGame.players[newGame.activePlayer].rollDice();
